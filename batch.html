@@ -27,9 +27,10 @@ header{background:#fff;padding:16px 20px;box-shadow:0 2px 8px rgba(139,69,19,.08
 
 /* Cards / Items */
 .card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(139,69,19,.04);border:1px solid #f3e9dc}
+.section-heading{font-size:16px;font-weight:800;color:#8B4513;margin:16px 0 8px 0;border-left:4px solid #8B4513;padding-left:8px}
 .item-title{font-size:14px;font-weight:700;color:#2c1810;margin-bottom:4px}
 .item-sub{font-size:12px;color:#7a6b63;margin-bottom:8px}
-.btn-action{display:inline-block;background:#8B4513;color:#fff;text-decoration:none;padding:6px 12px;font-size:11px;font-weight:700;border-radius:6px;transition:background 0.2s}
+.btn-action{display:inline-block;background:#8B4513;color:#fff;text-decoration:none;padding:6px 12px;font-size:11px;font-weight:700;border-radius:6px;transition:background 0.2s;cursor:pointer;border:none}
 .btn-action:hover{background:#6b3410}
 
 .loader{text-align:center;padding:40px;font-size:14px;color:#8B4513}
@@ -90,7 +91,7 @@ footer .dev{font-size:12px;font-weight:600;color:#00e5ff;text-shadow:0 0 4px rgb
 
 <script>
 const urlParams = new URLSearchParams(window.location.search);
-const courseId = urlParams.get('id') || '69d4b8c322cc6f4d5f00839f';
+const courseId = urlParams.get('id') || '6a4e376d5bac0ae4bab5a040';
 
 function switchTab(tabId, btn) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -106,10 +107,10 @@ async function loadBatchData() {
         const json = await res.json();
         
         if(json && json.data) {
-            const data = json.data;
+            let data = json.data;
             document.getElementById('courseBanner').src = data.banner || data.bannerSquare || '';
             document.getElementById('courseTitle').innerText = data.title;
-            document.getElementById('courseDesc').innerText = data.description.join(' | ');
+            document.getElementById('courseDesc').innerText = Array.isArray(data.description) ? data.description.join(' | ') : (data.description || '');
 
             const highlights = document.getElementById('highlightsList');
             highlights.innerHTML = '';
@@ -125,49 +126,70 @@ async function loadBatchData() {
         }
 
         // 2. Fetch PDFs (Notes)
-        const pdfRes = await fetch(`https://gdgoenkaratia.com/api/courses/${courseId}/pdfs?groupBy=topic`);
-        const pdfJson = await pdfRes.json();
-        const notesContainer = document.getElementById('notesList');
-        notesContainer.innerHTML = '';
-        
-        // Handle array or object response structure safely
-        let pdfs = Array.isArray(pdfJson) ? pdfJson : (pdfJson.data || []);
-        if(pdfs.length > 0) {
-            pdfs.forEach(pdf => {
-                let card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="item-title">${pdf.title}</div>
-                    <div class="item-sub">${pdf.description || ''}</div>
-                    <a class="btn-action" href="${pdf.uploadPdf}" target="_blank">Download PDF</a>
-                `;
-                notesContainer.appendChild(card);
-            });
-        } else {
-            notesContainer.innerHTML = '<div class="card">No notes available.</div>';
+        try {
+            const pdfRes = await fetch(`https://gdgoenkaratia.com/api/courses/${courseId}/pdfs?groupBy=topic`);
+            const pdfJson = await pdfRes.json();
+            const notesContainer = document.getElementById('notesList');
+            notesContainer.innerHTML = '';
+            
+            let pdfs = Array.isArray(pdfJson) ? pdfJson : (pdfJson.data || []);
+            if(pdfs.length > 0) {
+                pdfs.forEach(pdf => {
+                    let card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="item-title">${pdf.title}</div>
+                        <div class="item-sub">${pdf.description || ''}</div>
+                        <a class="btn-action" href="${pdf.uploadPdf}" target="_blank">Download PDF</a>
+                    `;
+                    notesContainer.appendChild(card);
+                });
+            } else {
+                notesContainer.innerHTML = '<div class="card">No notes available.</div>';
+            }
+        } catch(err) {
+            document.getElementById('notesList').innerHTML = '<div class="card">Failed to load notes.</div>';
         }
 
-        // 3. Fetch Videos / Classes
-        const vidRes = await fetch(`https://backend.multistreaming.site/api/courses/${courseId}/classes?populate=full`);
-        const vidJson = await vidRes.json();
-        const videosContainer = document.getElementById('videosList');
-        videosContainer.innerHTML = '';
+        // 3. Fetch Videos / Classes grouped by topic
+        try {
+            const vidRes = await fetch(`https://backend.multistreaming.site/api/courses/${courseId}/classes?populate=full`);
+            const vidJson = await vidRes.json();
+            const videosContainer = document.getElementById('videosList');
+            videosContainer.innerHTML = '';
 
-        let classes = Array.isArray(vidJson) ? vidJson : (vidJson.data || []);
-        if(classes.length > 0) {
-            classes.forEach(cls => {
-                let videoLink = cls.class_link || (cls.mp4Recordings && cls.mp4Recordings.length > 0 ? cls.mp4Recordings[0].url : '#');
-                let card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="item-title">${cls.title}</div>
-                    <div class="item-sub">Teacher: ${cls.teacherName || 'Gagan Pratap'}</div>
-                    <a class="btn-action" href="${videoLink}" target="_blank">Watch Class</a>
-                `;
-                videosContainer.appendChild(card);
-            });
-        } else {
-            videosContainer.innerHTML = '<div class="card">No classes available.</div>';
+            let topicsGroup = (vidJson && vidJson.data && Array.isArray(vidJson.data.classes)) ? vidJson.data.classes : [];
+            
+            if(topicsGroup.length > 0) {
+                topicsGroup.forEach(group => {
+                    let sectionHeading = document.createElement('div');
+                    sectionHeading.className = 'section-heading';
+                    sectionHeading.innerText = group.topicName || 'Classes';
+                    videosContainer.appendChild(sectionHeading);
+
+                    if(group.classes && group.classes.length > 0) {
+                        group.classes.forEach(cls => {
+                            let streamUrl = cls.class_link || '';
+                            if(!streamUrl && cls.mp4Recordings && cls.mp4Recordings.length > 0) {
+                                streamUrl = cls.mp4Recordings[0].url;
+                            }
+
+                            let card = document.createElement('div');
+                            card.className = 'card';
+                            card.innerHTML = `
+                                <div class="item-title">${cls.title}</div>
+                                <div class="item-sub">Teacher: ${cls.teacherName || 'Faculty'} | Duration: ${cls.duration ? Math.floor(cls.duration/60) + ' mins' : 'N/A'}</div>
+                                <button class="btn-action" onclick="playVideo('${encodeURIComponent(streamUrl)}')">Watch Class</button>
+                            `;
+                            videosContainer.appendChild(card);
+                        });
+                    }
+                });
+            } else {
+                videosContainer.innerHTML = '<div class="card">No classes available.</div>';
+            }
+        } catch(err) {
+            document.getElementById('videosList').innerHTML = '<div class="card">Failed to load classes.</div>';
         }
 
         document.getElementById('loader').style.display = 'none';
@@ -176,6 +198,14 @@ async function loadBatchData() {
     } catch(e) {
         document.getElementById('loader').innerText = "Failed to load batch data.";
     }
+}
+
+function playVideo(url) {
+    if(!url || url === 'undefined') {
+        alert("Video link not available!");
+        return;
+    }
+    window.location.href = `player.html?url=${url}`;
 }
 
 loadBatchData();
