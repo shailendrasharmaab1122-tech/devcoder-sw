@@ -10,7 +10,7 @@ body{background:#fdfbf7;color:#333;min-height:100vh;display:flex;flex-direction:
 header{background:#fff;padding:16px 20px;box-shadow:0 2px 8px rgba(139,69,19,.08);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0e6d2}
 .brand{font-size:20px;font-weight:800;color:#8B4513;letter-spacing:0.5px}
 .brand span{color:#D2B48C}
-.devcoderz-brand{font-size:12px;font-weight:700;color:#00e5ff;text-shadow:0 0 6px rgba(0,229,255,0.6)}
+.devcoderz-brand{font-size:12px;font-weight:700;color:#8B4513;background:#f5ebe0;padding:4px 10px;border-radius:20px;border:1px solid #e3d2bc;box-shadow:0 1px 3px rgba(139,69,19,.06)}
 
 .container{max-width:1000px;margin:20px auto;padding:0 16px;flex:1;width:100%}
 .banner{width:100%;height:200px;background:#f5ebe0;border-radius:14px;object-fit:cover;margin-bottom:16px;border:1px solid #f3e9dc}
@@ -25,9 +25,19 @@ header{background:#fff;padding:16px 20px;box-shadow:0 2px 8px rgba(139,69,19,.08
 .tab-content{display:none}
 .tab-content.active{display:block}
 
-/* Cards / Items */
-.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 10px rgba(139,69,19,.04);border:1px solid #f3e9dc}
-.section-heading{font-size:16px;font-weight:800;color:#8B4513;margin:16px 0 8px 0;border-left:4px solid #8B4513;padding-left:8px}
+/* Folder / Accordion styling */
+.folder-container{margin-bottom:12px;border:1px solid #f3e9dc;border-radius:12px;background:#fff;overflow:hidden;box-shadow:0 2px 8px rgba(139,69,19,.03)}
+.folder-header{padding:14px 16px;background:#fcf9f4;color:#8B4513;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid transparent;transition:background 0.2s}
+.folder-header:hover{background:#f7efe3}
+.folder-header.active{border-bottom-color:#f3e9dc;background:#f5ebe0}
+.folder-icon{font-size:14px;transition:transform 0.3s ease}
+.folder-header.active .folder-icon{transform:rotate(180deg)}
+
+.folder-content{max-height:0;overflow:hidden;transition:max-height 0.3s ease-in-out;padding:0 16px;background:#fff}
+.folder-content.open{padding:12px 16px;max-height:2000px}
+
+/* Cards */
+.card{background:#fdfbf7;border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid #f0e6d2}
 .item-title{font-size:14px;font-weight:700;color:#2c1810;margin-bottom:4px}
 .item-sub{font-size:12px;color:#7a6b63;margin-bottom:8px}
 .btn-action{display:inline-block;background:#8B4513;color:#fff;text-decoration:none;padding:6px 12px;font-size:11px;font-weight:700;border-radius:6px;transition:background 0.2s;cursor:pointer;border:none}
@@ -36,7 +46,7 @@ header{background:#fff;padding:16px 20px;box-shadow:0 2px 8px rgba(139,69,19,.08
 .loader{text-align:center;padding:40px;font-size:14px;color:#8B4513}
 footer{background:#fff;border-top:1px solid #f0e6d2;text-align:center;padding:16px;margin-top:40px}
 footer .jsr{color:#ff9800;font-weight:700;font-size:13px;margin-bottom:4px}
-footer .dev{font-size:12px;font-weight:600;color:#00e5ff;text-shadow:0 0 4px rgba(0,229,255,0.6)}
+footer .dev{font-size:12px;font-weight:600;color:#8B4513;background:#f5ebe0;display:inline-block;padding:4px 12px;border-radius:20px;border:1px solid #e3d2bc;margin-top:4px}
 </style>
 </head>
 <body>
@@ -86,7 +96,7 @@ footer .dev{font-size:12px;font-weight:600;color:#00e5ff;text-shadow:0 0 4px rgb
 
 <footer>
  <div class="jsr">🚩 Jai Shree Ram 🚩</div>
- <div class="dev">Developed by - Devansh Sharma (The DevCoderZ)</div>
+ <div><span class="dev">Developed by - Devansh Sharma (The DevCoderZ)</span></div>
 </footer>
 
 <script>
@@ -125,24 +135,50 @@ async function loadBatchData() {
             }
         }
 
-        // 2. Fetch PDFs (Notes)
+        // 2. Fetch PDFs (Notes) grouped by topics with folder accordion support
         try {
             const pdfRes = await fetch(`https://gdgoenkaratia.com/api/courses/${courseId}/pdfs?groupBy=topic`);
             const pdfJson = await pdfRes.json();
             const notesContainer = document.getElementById('notesList');
             notesContainer.innerHTML = '';
             
-            let pdfs = Array.isArray(pdfJson) ? pdfJson : (pdfJson.data || []);
-            if(pdfs.length > 0) {
-                pdfs.forEach(pdf => {
-                    let card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="item-title">${pdf.title}</div>
-                        <div class="item-sub">${pdf.description || ''}</div>
-                        <a class="btn-action" href="${pdf.uploadPdf}" target="_blank">Download PDF</a>
-                    `;
-                    notesContainer.appendChild(card);
+            let topicsArr = (pdfJson && pdfJson.data && Array.isArray(pdfJson.data.topics)) ? pdfJson.data.topics : [];
+            
+            if(topicsArr.length > 0) {
+                topicsArr.forEach((group, index) => {
+                    let folderDiv = document.createElement('div');
+                    folderDiv.className = 'folder-container';
+
+                    let headerDiv = document.createElement('div');
+                    headerDiv.className = 'folder-header' + (index === 0 ? ' active' : '');
+                    headerDiv.innerHTML = `<span>📁 ${group.topicName || 'Notes'}</span> <span class="folder-icon">▼</span>`;
+
+                    let contentDiv = document.createElement('div');
+                    contentDiv.className = 'folder-content' + (index === 0 ? ' open' : '');
+
+                    headerDiv.onclick = () => {
+                        headerDiv.classList.toggle('active');
+                        contentDiv.classList.toggle('open');
+                    };
+
+                    if(group.pdfs && group.pdfs.length > 0) {
+                        group.pdfs.forEach(pdf => {
+                            let card = document.createElement('div');
+                            card.className = 'card';
+                            card.innerHTML = `
+                                <div class="item-title">${pdf.title}</div>
+                                <div class="item-sub">${pdf.description || ''}</div>
+                                <a class="btn-action" href="${pdf.uploadPdf}" target="_blank" rel="noopener noreferrer">View PDF</a>
+                            `;
+                            contentDiv.appendChild(card);
+                        });
+                    } else {
+                        contentDiv.innerHTML = '<div class="card">No PDFs available in this section.</div>';
+                    }
+
+                    folderDiv.appendChild(headerDiv);
+                    folderDiv.appendChild(contentDiv);
+                    notesContainer.appendChild(folderDiv);
                 });
             } else {
                 notesContainer.innerHTML = '<div class="card">No notes available.</div>';
@@ -151,7 +187,7 @@ async function loadBatchData() {
             document.getElementById('notesList').innerHTML = '<div class="card">Failed to load notes.</div>';
         }
 
-        // 3. Fetch Videos / Classes grouped by topic
+        // 3. Fetch Videos / Classes as Folders (Accordions)
         try {
             const vidRes = await fetch(`https://backend.multistreaming.site/api/courses/${courseId}/classes?populate=full`);
             const vidJson = await vidRes.json();
@@ -161,11 +197,21 @@ async function loadBatchData() {
             let topicsGroup = (vidJson && vidJson.data && Array.isArray(vidJson.data.classes)) ? vidJson.data.classes : [];
             
             if(topicsGroup.length > 0) {
-                topicsGroup.forEach(group => {
-                    let sectionHeading = document.createElement('div');
-                    sectionHeading.className = 'section-heading';
-                    sectionHeading.innerText = group.topicName || 'Classes';
-                    videosContainer.appendChild(sectionHeading);
+                topicsGroup.forEach((group, index) => {
+                    let folderDiv = document.createElement('div');
+                    folderDiv.className = 'folder-container';
+
+                    let headerDiv = document.createElement('div');
+                    headerDiv.className = 'folder-header' + (index === 0 ? ' active' : '');
+                    headerDiv.innerHTML = `<span>📁 ${group.topicName || 'Classes'}</span> <span class="folder-icon">▼</span>`;
+
+                    let contentDiv = document.createElement('div');
+                    contentDiv.className = 'folder-content' + (index === 0 ? ' open' : '');
+
+                    headerDiv.onclick = () => {
+                        headerDiv.classList.toggle('active');
+                        contentDiv.classList.toggle('open');
+                    };
 
                     if(group.classes && group.classes.length > 0) {
                         group.classes.forEach(cls => {
@@ -181,9 +227,15 @@ async function loadBatchData() {
                                 <div class="item-sub">Teacher: ${cls.teacherName || 'Faculty'} | Duration: ${cls.duration ? Math.floor(cls.duration/60) + ' mins' : 'N/A'}</div>
                                 <button class="btn-action" onclick="playVideo('${encodeURIComponent(streamUrl)}')">Watch Class</button>
                             `;
-                            videosContainer.appendChild(card);
+                            contentDiv.appendChild(card);
                         });
+                    } else {
+                        contentDiv.innerHTML = '<div class="card">No classes in this folder.</div>';
                     }
+
+                    folderDiv.appendChild(headerDiv);
+                    folderDiv.appendChild(contentDiv);
+                    videosContainer.appendChild(folderDiv);
                 });
             } else {
                 videosContainer.innerHTML = '<div class="card">No classes available.</div>';
