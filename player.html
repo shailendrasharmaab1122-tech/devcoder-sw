@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Selection Way - Video Player</title>
+<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:#121212;color:#fff;min-height:100vh;display:flex;flex-direction:column}
+header{background:#1e1e1e;padding:14px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2c2c2c}
+.brand{font-size:18px;font-weight:800;color:#ff9800;letter-spacing:0.5px}
+.brand span{color:#e0e0e0}
+.devcoderz-brand{font-size:12px;font-weight:700;color:#8B4513;background:#f5ebe0;padding:4px 10px;border-radius:20px;border:1px solid #e3d2bc}
+.player-container{flex:1;display:flex;align-items:center;justify-content:center;background:#000;padding:0;width:100%}
+.video-js{width:100%;height:100%;max-height:80vh}
+.vjs-big-play-button{top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;border-radius:50%!important;background-color:rgba(139,69,19,0.8)!important;border-color:#ff9800!important}
+.vjs-theme-sea .vjs-control-bar{background:rgba(18,18,18,0.85)!important}
+.vjs-play-progress{background:#ff9800!important}
+.info-section{padding:20px;background:#1a1a1a;border-top:1px solid #2c2c2c}
+.video-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:6px}
+.video-sub{font-size:13px;color:#aaa}
+footer{background:#1e1e1e;border-top:1px solid #2c2c2c;text-align:center;padding:14px;font-size:12px}
+footer .jsr{color:#ff9800;font-weight:700;margin-bottom:4px}
+footer .dev{font-size:12px;font-weight:600;color:#8B4513;background:#f5ebe0;display:inline-block;padding:3px 10px;border-radius:15px}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="brand" style="cursor:pointer" onclick="location.href='index.html'">Selection <span>Way</span></div>
+ <div class="devcoderz-brand">DevCoderZ</div>
+</header>
+
+<div class="player-container" id="playerWrapper">
+</div>
+
+<div class="info-section">
+ <div class="video-title" id="videoTitle">Streaming Class Video</div>
+ <div class="video-sub">Enjoy high-speed uninterrupted learning experience.</div>
+</div>
+
+<footer>
+ <div class="jsr">🚩 Jai Shree Ram 🚩</div>
+ <div><span class="dev">Developed by - Devansh Sharma (The DevCoderZ)</span></div>
+</footer>
+
+<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+<script>
+const urlParams = new URLSearchParams(window.location.search);
+const rawUrl = urlParams.get('url');
+
+if (!rawUrl) {
+    alert("No video URL provided!");
+    window.location.href = 'index.html';
+}
+
+const decodedUrl = decodeURIComponent(rawUrl);
+
+if (decodedUrl.includes('youtube.com') || decodedUrl.includes('youtu.be')) {
+    window.location.href = decodedUrl;
+} else {
+    const wrapper = document.getElementById('playerWrapper');
+    wrapper.innerHTML = `<video id="customPlayer" class="video-js vjs-big-play-centered vjs-theme-sea" controls preload="auto" playsinline>
+        <source src="${decodedUrl}" type="application/x-mpegURL">
+    </video>`;
+
+    const player = videojs('customPlayer', {
+        fluid: true,
+        responsive: true,
+        playbackRates: [0.5, 1, 1.25, 1.5, 2]
+    });
+}
+</script>
+
+</body>
+</html>
