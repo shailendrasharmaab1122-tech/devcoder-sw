@@ -111,6 +111,9 @@ async function initPlayer() {
     if (videoUrl) {
         if (Hls.isSupported()) {
             hls = new Hls({
+                xhrSetup: function (xhr, url) {
+                    xhr.withCredentials = false;
+                },
                 maxBufferLength: 30,
                 maxMaxBufferLength: 60,
                 startFragPrefetch: true,
@@ -125,6 +128,21 @@ async function initPlayer() {
             });
             hls.on(Hls.Events.LEVEL_SWITCHED,(e,data)=>{
                 quality.value=data.level;
+            });
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                if (data.fatal) {
+                    switch(data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            hls.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            hls.destroy();
+                            break;
+                    }
+                }
             });
         } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
             v.src = videoUrl;
