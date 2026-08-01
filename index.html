@@ -10,6 +10,7 @@ body{background:#fdfbf7;color:#333;min-height:100vh;display:flex;flex-direction:
 header{background:#fff;padding:16px 20px;box-shadow:0 2px 8px rgba(139,69,19,.08);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0e6d2}
 .brand{font-size:20px;font-weight:800;color:#8B4513;letter-spacing:0.5px}
 .brand span{color:#D2B48C}
+.devcoderz-brand{font-size:12px;font-weight:700;color:#00e5ff;text-shadow:0 0 6px rgba(0,229,255,0.6)}
 .container{max-width:1200px;margin:20px auto;padding:0 16px;flex:1;width:100%}
 .heading{font-size:18px;font-weight:700;color:#5c3a21;margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
@@ -36,6 +37,7 @@ footer .dev{font-size:12px;font-weight:600;color:#00e5ff;text-shadow:0 0 4px rgb
 
 <header>
  <div class="brand">Selection <span>Way</span></div>
+ <div class="devcoderz-brand">DevCoderZ</div>
 </header>
 
 <div class="container">
@@ -46,7 +48,7 @@ footer .dev{font-size:12px;font-weight:600;color:#00e5ff;text-shadow:0 0 4px rgb
 
 <footer>
  <div class="jsr">🚩 Jai Shree Ram 🚩</div>
- <div class="dev">Developed by - Devansh Sharma</div>
+ <div class="dev">Developed by - Devansh Sharma (The DevCoderZ)</div>
 </footer>
 
 <script>
@@ -79,7 +81,7 @@ async function fetchCourses() {
                                 <span class="discount">${disc}</span>
                                 <span class="price">${orig}</span>
                             </div>
-                            <button class="btn-view" onclick="alert('Opening course: ${course.id}')">View Batch</button>
+                            <button class="btn-view" onclick="location.href='batch.html?id=${course.id}'">View Batch</button>
                         </div>
                     </div>
                 `;
@@ -96,4 +98,3 @@ fetchCourses();
 
 </body>
 </html>
-  
