@@ -115,7 +115,7 @@ async function loadBatchData() {
         // 1. Fetch Course Info (Overview)
         const res = await fetch(`https://backend.multistreaming.site/api/courses/${courseId}`);
         const json = await res.json();
-        
+
         if(json && json.data) {
             let data = json.data;
             document.getElementById('courseBanner').src = data.banner || data.bannerSquare || '';
@@ -141,9 +141,9 @@ async function loadBatchData() {
             const pdfJson = await pdfRes.json();
             const notesContainer = document.getElementById('notesList');
             notesContainer.innerHTML = '';
-            
+
             let topicsArr = (pdfJson && pdfJson.data && Array.isArray(pdfJson.data.topics)) ? pdfJson.data.topics : [];
-            
+
             if(topicsArr.length > 0) {
                 topicsArr.forEach((group, index) => {
                     let folderDiv = document.createElement('div');
@@ -195,7 +195,7 @@ async function loadBatchData() {
             videosContainer.innerHTML = '';
 
             let topicsGroup = (vidJson && vidJson.data && Array.isArray(vidJson.data.classes)) ? vidJson.data.classes : [];
-            
+
             if(topicsGroup.length > 0) {
                 topicsGroup.forEach((group, index) => {
                     let folderDiv = document.createElement('div');
@@ -225,7 +225,7 @@ async function loadBatchData() {
                             card.innerHTML = `
                                 <div class="item-title">${cls.title}</div>
                                 <div class="item-sub">Teacher: ${cls.teacherName || 'Faculty'} | Duration: ${cls.duration ? Math.floor(cls.duration/60) + ' mins' : 'N/A'}</div>
-                                <button class="btn-action" onclick="playVideo('${encodeURIComponent(streamUrl)}')">Watch Class</button>
+                                <a class="btn-action" href="${streamUrl}" target="_blank" rel="noopener noreferrer">Watch Class</a>
                             `;
                             contentDiv.appendChild(card);
                         });
@@ -250,14 +250,6 @@ async function loadBatchData() {
     } catch(e) {
         document.getElementById('loader').innerText = "Failed to load batch data.";
     }
-}
-
-function playVideo(url) {
-    if(!url || url === 'undefined') {
-        alert("Video link not available!");
-        return;
-    }
-    window.location.href = `url=${url}`;
 }
 
 loadBatchData();
