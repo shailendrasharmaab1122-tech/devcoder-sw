@@ -10,7 +10,7 @@ body{background:#fdfbf7;color:#333;min-height:100vh;display:flex;flex-direction:
 header{background:#fff;padding:16px 20px;box-shadow:0 2px 8px rgba(139,69,19,.08);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f0e6d2}
 .brand{font-size:20px;font-weight:800;color:#8B4513;letter-spacing:0.5px}
 .brand span{color:#D2B48C}
-.devcoderz-brand{font-size:12px;font-weight:700;color:#00e5ff;text-shadow:0 0 6px rgba(0,229,255,0.6)}
+.devcoderz-brand{font-size:12px;font-weight:700;color:#8B4513;background:#f5ebe0;padding:4px 10px;border-radius:20px;border:1px solid #e3d2bc;box-shadow:0 1px 3px rgba(139,69,19,.06)}
 .container{max-width:1200px;margin:20px auto;padding:0 16px;flex:1;width:100%}
 .heading{font-size:18px;font-weight:700;color:#5c3a21;margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
@@ -30,7 +30,7 @@ header{background:#fff;padding:16px 20px;box-shadow:0 2px 8px rgba(139,69,19,.08
 .loader{text-align:center;padding:50px;font-size:14px;color:#8B4513}
 footer{background:#fff;border-top:1px solid #f0e6d2;text-align:center;padding:16px;margin-top:40px}
 footer .jsr{color:#ff9800;font-weight:700;font-size:13px;margin-bottom:4px}
-footer .dev{font-size:12px;font-weight:600;color:#00e5ff;text-shadow:0 0 4px rgba(0,229,255,0.6)}
+footer .dev{font-size:12px;font-weight:600;color:#8B4513;background:#f5ebe0;display:inline-block;padding:4px 12px;border-radius:20px;border:1px solid #e3d2bc;margin-top:4px}
 </style>
 </head>
 <body>
@@ -48,25 +48,26 @@ footer .dev{font-size:12px;font-weight:600;color:#00e5ff;text-shadow:0 0 4px rgb
 
 <footer>
  <div class="jsr">🚩 Jai Shree Ram 🚩</div>
- <div class="dev">Developed by - Devansh Sharma (The DevCoderZ)</div>
+ <div><span class="dev">Developed by - Devansh Sharma (The DevCoderZ)</span></div>
 </footer>
 
 <script>
 async function fetchCourses() {
     try {
-        const res = await fetch("https://devcoderz-sw.vercel.app/api/hehe?path=courses/
-");
+        const res = await fetch("https://devcoderz-sw.vercel.app/api/hehe?path=courses/");
         const json = await res.json();
         const grid = document.getElementById("courseGrid");
         const loader = document.getElementById("loader");
         loader.style.display = "none";
 
-        if(json && json.data) {
-            json.data.forEach(course => {
+        const coursesList = json.data || json;
+        if(Array.isArray(coursesList)) {
+            coursesList.forEach(course => {
                 let bannerImg = course.banner || course.bannerSquare || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&auto=format&fit=crop&q=60";
-                let disc = course.discountPrice !== null ? `₹${course.discountPrice}` : 'Free';
+                let disc = course.discountPrice !== null && course.discountPrice !== undefined ? `₹${course.discountPrice}` : 'Free';
                 let orig = course.price ? `₹${course.price}` : '';
-                
+                let descText = course.short_description || (Array.isArray(course.description) ? course.description.join(', ') : (course.description || ''));
+
                 let card = document.createElement("div");
                 card.className = "card";
                 card.innerHTML = `
@@ -75,7 +76,7 @@ async function fetchCourses() {
                         <div>
                             <span class="badge">${course.mainCategory ? course.mainCategory.mainCategoryName : 'GENERAL'}</span>
                             <div class="title">${course.title}</div>
-                            <div class="desc">${course.short_description || course.description.join(', ')}</div>
+                            <div class="desc">${descText}</div>
                         </div>
                         <div class="footer-row">
                             <div class="price-box">
@@ -88,6 +89,9 @@ async function fetchCourses() {
                 `;
                 grid.appendChild(card);
             });
+        } else {
+            loader.style.display = "block";
+            loader.innerText = "No courses found.";
         }
     } catch(e) {
         document.getElementById("loader").innerText = "Failed to load courses. Please check connection.";
