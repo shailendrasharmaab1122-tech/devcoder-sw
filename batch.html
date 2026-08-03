@@ -113,7 +113,7 @@ function switchTab(tabId, btn) {
 async function loadBatchData() {
     try {
         // 1. Fetch Course Info (Overview)
-        const res = await fetch(`https://backend.multistreaming.site/api/courses/${courseId}`);
+        const res = await fetch(`https://devcoderz-sw.vercel.app/api/hehe?target=multistreaming&path=courses/${courseId}`);
         const json = await res.json();
 
         if(json && json.data) {
@@ -137,7 +137,7 @@ async function loadBatchData() {
 
         // 2. Fetch PDFs (Notes) grouped by topics with folder accordion support
         try {
-            const pdfRes = await fetch(`https://gdgoenkaratia.com/api/courses/${courseId}/pdfs?groupBy=topic`);
+            const pdfRes = await fetch(`https://devcoderz-sw.vercel.app/api/hehe?target=gdgoenkaratia&path=courses/${courseId}/pdfs&groupBy=topic`);
             const pdfJson = await pdfRes.json();
             const notesContainer = document.getElementById('notesList');
             notesContainer.innerHTML = '';
@@ -189,7 +189,7 @@ async function loadBatchData() {
 
         // 3. Fetch Videos / Classes as Folders (Accordions)
         try {
-            const vidRes = await fetch(`https://backend.multistreaming.site/api/courses/${courseId}/classes?populate=full`);
+            const vidRes = await fetch(`https://devcoderz-sw.vercel.app/api/hehe?target=multistreaming&path=courses/${courseId}/classes&populate=full`);
             const vidJson = await vidRes.json();
             const videosContainer = document.getElementById('videosList');
             videosContainer.innerHTML = '';
