@@ -73,9 +73,7 @@ footer .dev{font-size:12px;font-weight:600;color:#8B4513;background:#f5ebe0;disp
 <script>
 function showTgPopup() {
     if(!localStorage.getItem('tg_popup_shown')) {
-        setTimeout(() => {
-            document.getElementById('tgPopup').classList.add('active');
-        }, 1500);
+        document.getElementById('tgPopup').classList.add('active');
     }
 }
 
