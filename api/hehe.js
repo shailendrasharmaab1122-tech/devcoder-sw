@@ -1,17 +1,19 @@
 export default async function handler(req, res) {
-  const { target, path, ...queryParams } = req.query;
+  const { path, ...queryParams } = req.query;
 
-  const allowedTargets = {
-    "gdgoenkaratia": "https://gdgoenkaratia.com/api",
-    "multistreaming": "https://backend.multistreaming.site/api"
-  };
-
-  if (!target || !allowedTargets[target] || !path) {
-    return res.status(400).json({ error: "Invalid parameters" });
+  if (!path) {
+    return res.status(400).json({ error: "Missing path parameter" });
   }
 
-  const searchParams = new URLSearchParams(queryParams).toString();
-  const targetUrl = `${allowedTargets[target]}/${path}${searchParams ? '?' + searchParams : ''}`;
+  // Auto-detect target based on the path or keywords
+  let targetUrl = "";
+  if (path.includes("pdfs") || path.startsWith("courses/") && path.includes("/pdfs")) {
+    const searchParams = new URLSearchParams(queryParams).toString();
+    targetUrl = `https://gdgoenkaratia.com/api/${path}${searchParams ? '?' + searchParams : ''}`;
+  } else {
+    const searchParams = new URLSearchParams(queryParams).toString();
+    targetUrl = `https://backend.multistreaming.site/api/${path}${searchParams ? '?' + searchParams : ''}`;
+  }
 
   try {
     const response = await fetch(targetUrl, {
