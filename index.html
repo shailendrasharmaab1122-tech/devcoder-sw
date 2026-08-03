@@ -54,7 +54,8 @@ footer .dev{font-size:12px;font-weight:600;color:#00e5ff;text-shadow:0 0 4px rgb
 <script>
 async function fetchCourses() {
     try {
-        const res = await fetch("https://backend.multistreaming.site/api/courses/");
+        const res = await fetch("https://devcoderz-sw.vercel.app/api/hehe?path=courses/
+");
         const json = await res.json();
         const grid = document.getElementById("courseGrid");
         const loader = document.getElementById("loader");
